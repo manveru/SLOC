@@ -26,7 +26,8 @@ op = OptionParser.new{|o|
   o.banner = 'sloc PATH1 PATH2 ... [options]'
   o.separator ''
   o.separator 'SLOC options:'
-  o.on('-l', '--lang LANGUAGE', 'override default language, use when counting from pipe'){|v| options[:lang] = v.to_sym }
+  o.on('-l', '--lang LANGUAGE', 'override default language, use when counting from pipe'){|v| options.lang = v.to_sym }
+  o.on('-r', '--recursive', 'recurse into directories'){|v| options.recursive = v }
   o.separator ''
   o.separator 'General options:'
   o.on('-h', '--help'){ puts o; exit }
@@ -60,5 +61,17 @@ end
 require_sloc.call
 
 total = Hash.new(0)
-ARGV.each{|arg| SLOC.aggregate(SLOC.glob(arg), total)}
+if options.recursive
+  require 'find'
+
+  ARGV.each{|arg|
+    Find.find(arg) do |path|
+      SLOC.aggregate(SLOC.glob(path), total)
+    end
+  }
+else
+  ARGV.each{|arg|
+    SLOC.aggregate(SLOC.glob(arg), total)
+  }
+end
 report.call total

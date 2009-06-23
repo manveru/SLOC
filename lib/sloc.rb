@@ -59,6 +59,7 @@ module SLOC
 
   def detect_shebang(path)
     shebang = path.open{|io| io.gets }
+    return unless shebang && shebang.valid_encoding?
 
     if shebang =~ /^#!/
       case shebang

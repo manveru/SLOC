@@ -5,6 +5,9 @@ module SLOC
     def initialize(file, name)
       Treetop.load(File.join(GRAMMAR_ROOT, "#{file}.tt"))
       @parser = Module.const_get(name).new
+    rescue NameError
+      Treetop.load(File.join(GRAMMAR_ROOT, "common.tt"))
+      retry
     end
 
     def glob(*files)

@@ -1,14 +1,8 @@
 $LOAD_PATH.unshift(File.expand_path('../../lib', __FILE__))
 require 'sloc'
 
-Dir.glob '/home/manveru/bin/*' do |path|
-  SLOC.file(path){|count| p path => count }
-end
-
 require 'bacon'
 Bacon.summary_on_exit
-
-# p SLOC::Counter.new('ruby', 'RubyParser').glob('~/github/manveru/ramaze/**/*')
 
 describe 'SLOC' do
   describe 'Ruby parser' do
