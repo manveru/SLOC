@@ -1,0 +1,51 @@
+grammar Common
+  rule lines
+    line* {
+      def count
+        elements.each_with_object(Hash.new(0)){|element, total|
+          element.count.each{|k,v| total[k] += v }
+        }
+      end
+    }
+  end
+
+  rule line
+    comment / empty / code
+  end
+
+  rule comment
+    [ \t]* comment_token (!"\n" .)* ("\n" / "") {
+      def count
+        {comment: 1}
+      end
+    }
+  end
+
+  rule empty
+    [ \t\n]+ {
+      def count
+        {comment: 0}
+      end
+    }
+  end
+
+  rule code
+    code_with_comment / code_without_comment
+  end
+
+  rule code_with_comment
+    (!(comment_token / "\n") .)+ comment_token (!"\n" .)* ("\n" / "") {
+      def count
+        {code: 1, comment: 1}
+      end
+    }
+  end
+
+  rule code_without_comment
+    (!(comment_token / "\n") .)+ (comment_token / "\n" / "") {
+      def count
+        {code: 1}
+      end
+    }
+  end
+end

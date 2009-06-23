@@ -1,4 +1,4 @@
-grammar Sh
+grammar Lisp
   include Common
 
   rule file
@@ -6,6 +6,6 @@ grammar Sh
   end
 
   rule comment_token
-    '#'
+    ';'
   end
 end

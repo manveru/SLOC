@@ -9,7 +9,8 @@ module SLOC
 
   COUNTERS_NAMES = {
     :ruby => 'RubyParser',
-    :sh => 'ShParser',
+    :sh   => 'ShParser',
+    :lisp => 'LispParser',
   }
 
   module_function
@@ -54,6 +55,8 @@ module SLOC
       :ruby
     when /\.(sh|zsh)$/
       :sh
+    when /\.(lisp)/
+      :lisp
     end
   end
 

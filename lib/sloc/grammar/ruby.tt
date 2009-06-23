@@ -1,16 +1,16 @@
 grammar Ruby
+  include Common
+
   rule file
-    line* {
-      def count
-        elements.each_with_object(Hash.new(0)){|element, total|
-          SLOC.aggregate(element.count, total)
-        }
-      end
-    }
+    lines
   end
 
   rule line
     comment / empty / eof / code
+  end
+
+  rule comment_token
+    '#'
   end
 
   rule comment
@@ -18,7 +18,7 @@ grammar Ruby
   end
 
   rule uniline
-    [ \t]* '#' (!"\n" .)* ("\n" / "") {
+    [ \t]* comment_token (!"\n" .)* ("\n" / "") {
       def count
         {comment: 1}
       end
@@ -33,38 +33,10 @@ grammar Ruby
     }
   end
 
-  rule empty
-    [ \t\n]+ {
-      def count
-        {comment: 0}
-      end
-    }
-  end
-
   rule eof
     "__END__" value:.* {
       def count
         {comment: value.text_value.count("\n")}
-      end
-    }
-  end
-
-  rule code
-    code_with_comment / code_without_comment
-  end
-
-  rule code_with_comment
-    (![#\n] .)+ "#" (!"\n" .)* ("\n" / "") {
-      def count
-        {code: 1, comment: 1}
-      end
-    }
-  end
-
-  rule code_without_comment
-    (![#\n] .)+ ("#" / "\n" / "") {
-      def count
-        {code: 1}
       end
     }
   end
