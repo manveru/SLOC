@@ -1,0 +1,64 @@
+#!/usr/bin/env ruby
+
+require 'optparse'
+require 'ostruct'
+
+report = lambda{|total|
+  total.sort.each do |name, amount|
+    puts "#{name}: #{amount}"
+  end
+}
+
+require_sloc = lambda{
+  begin
+    require 'sloc'
+  rescue LoadError
+    $LOAD_PATH.unshift(File.expand_path('../../lib', __FILE__))
+    require 'sloc'
+  end
+}
+
+options = OpenStruct.new(:lang => :ruby)
+
+op = OptionParser.new{|o|
+  o.version = '2009.06.23'
+  o.release = 'c) by The Rubyists LLC. (manveru@rubyists.com'
+  o.banner = 'sloc PATH1 PATH2 ... [options]'
+  o.separator ''
+  o.separator 'SLOC options:'
+  o.on('-l', '--lang LANGUAGE', 'override default language, use when counting from pipe'){|v| options[:lang] = v.to_sym }
+  o.separator ''
+  o.separator 'General options:'
+  o.on('-h', '--help'){ puts o; exit }
+  o.on('-v', '--version'){ puts o.ver; exit }
+}
+
+op.parse!
+
+if ARGV.empty?
+  if select([ARGF], nil, nil, 0)
+    require_sloc.call
+
+    # FIXME: currently this reads all the input into memory, this has to be
+    #        done because we let Treetop parse the whole contents at once.
+    #        There seems to be a way to parse one line at a time, but the API
+    #        is not fully clear to me yet. Something with consume_all_input.
+
+    total = Hash.new(0)
+    counter = SLOC.counter_for(options.lang)
+    source = []
+
+    ARGF.each_line{|line| source << line }
+
+    report.call(counter.string(source.join))
+  else
+    puts op
+    exit 1
+  end
+end
+
+require_sloc.call
+
+total = Hash.new(0)
+ARGV.each{|arg| SLOC.aggregate(SLOC.glob(arg), total)}
+report.call total

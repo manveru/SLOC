@@ -1,0 +1,71 @@
+grammar Ruby
+  rule file
+    line* {
+      def count
+        elements.each_with_object(Hash.new(0)){|element, total|
+          SLOC.aggregate(element.count, total)
+        }
+      end
+    }
+  end
+
+  rule line
+    comment / empty / eof / code
+  end
+
+  rule comment
+    uniline / multiline
+  end
+
+  rule uniline
+    [ \t]* '#' (!"\n" .)* ("\n" / "") {
+      def count
+        {comment: 1}
+      end
+    }
+  end
+
+  rule multiline
+    "=begin" value:(!"\n=end" .)* "\n=end" {
+      def count
+        {comment: value.text_value.count("\n")}
+      end
+    }
+  end
+
+  rule empty
+    [ \t\n]+ {
+      def count
+        {comment: 0}
+      end
+    }
+  end
+
+  rule eof
+    "__END__" value:.* {
+      def count
+        {comment: value.text_value.count("\n")}
+      end
+    }
+  end
+
+  rule code
+    code_with_comment / code_without_comment
+  end
+
+  rule code_with_comment
+    (![#\n] .)+ "#" (!"\n" .)* ("\n" / "") {
+      def count
+        {code: 1, comment: 1}
+      end
+    }
+  end
+
+  rule code_without_comment
+    (![#\n] .)+ ("#" / "\n" / "") {
+      def count
+        {code: 1}
+      end
+    }
+  end
+end
