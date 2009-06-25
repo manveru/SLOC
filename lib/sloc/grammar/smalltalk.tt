@@ -1,0 +1,23 @@
+grammar Smalltalk
+  include Common
+
+  rule file
+    lines
+  end
+
+  rule code
+    ('$"' / [^"])+ {
+      def count
+        {code: text_value.count("\n")}
+      end
+    }
+  end
+
+  rule comment
+    '"' (!'"' .)* '"' {
+      def count
+        {comment: text_value.count("\n")}
+      end
+    }
+  end
+end

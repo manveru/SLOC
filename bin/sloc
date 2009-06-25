@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
 
+require 'pathname'
 require 'optparse'
 require 'ostruct'
 
@@ -13,7 +14,9 @@ require_sloc = lambda{
   begin
     require 'sloc'
   rescue LoadError
-    $LOAD_PATH.unshift(File.expand_path('../../lib', __FILE__))
+    file = Pathname(__FILE__)
+    file = file.readlink if file.symlink?
+    $LOAD_PATH.unshift(File.expand_path('../../lib', file))
     require 'sloc'
   end
 }

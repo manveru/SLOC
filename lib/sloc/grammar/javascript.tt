@@ -1,0 +1,11 @@
+grammar Javascript
+  include Common
+
+  rule file
+    lines
+  end
+
+  rule comment_token
+    '//'
+  end
+end

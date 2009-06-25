@@ -4,7 +4,7 @@ module SLOC
   class Counter
     def initialize(file, name)
       Treetop.load(File.join(GRAMMAR_ROOT, "#{file}.tt"))
-      @parser = Module.const_get(name).new
+      @parser_class = Module.const_get(name)
     rescue NameError
       Treetop.load(File.join(GRAMMAR_ROOT, "common.tt"))
       retry
@@ -19,17 +19,29 @@ module SLOC
     end
 
     def file(file, total = Hash.new(0))
-      SLOC.aggregate(@parser.parse(File.read(file)).count, total)
+      SLOC.aggregate(count(File.read(file)), total)
     rescue => ex
       p ex
       raise "In #{file} - #{@parser.failure_reason}"
     end
 
     def string(string, total = Hash.new(0))
-      SLOC.aggregate(@parser.parse(string).count, total)
+      SLOC.aggregate(count(string), total)
     rescue => ex
       p ex
       raise @parser.failure_reason.dump
+    end
+
+    private
+
+    def count(string)
+      @parser = @parser_class.new
+      @parser.parse(string).count
+    ensure
+      count_objects = ObjectSpace.count_objects
+      total, free = count_objects.values_at(:TOTAL, :FREE)
+      @parser = nil
+      GC.start if free < 524288
     end
   end
 end
